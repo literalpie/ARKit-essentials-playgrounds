@@ -25,7 +25,8 @@ class MyViewController : UIViewController, ARSCNViewDelegate, ARSessionDelegate,
     let arView = ARSCNView()
 
     override func loadView() {
-        view = UIView(frame: CGRect(origin: CGPoint(x: 0, y: 0), size: CGSize(width: 800, height: 500)))
+        view = ARSCNView()
+        guard let arView = view as? ARSCNView else { return }
 
         let tapRecognizer = UITapGestureRecognizer(target: self,
                                                    action: #selector(handleTheTap(tapGesture:)))
@@ -37,8 +38,8 @@ class MyViewController : UIViewController, ARSCNViewDelegate, ARSessionDelegate,
         panRecognizer.delegate = self
         arView.addGestureRecognizer(panRecognizer)
 
-        arView.frame = view.frame
-        view.addSubview(arView)
+//        arView.frame = view.frame
+//        view.addSubview(arView)
 
         let config = ARWorldTrackingConfiguration()
         arView.session.run(config)
@@ -55,11 +56,13 @@ class MyViewController : UIViewController, ARSCNViewDelegate, ARSessionDelegate,
     }
 
     @objc func handleTheTap(tapGesture: UITapGestureRecognizer) {
+        guard let arView = view as? ARSCNView else { return }
         let anchor = addAnchorInFront()
         arView.session.add(anchor: anchor)
     }
 
     @objc func handleThePan(gestureRecognizer: UIPanGestureRecognizer) {
+        guard let arView = view as? ARSCNView else { return }
         switch gestureRecognizer.state {
         case .began:
             let location = gestureRecognizer.location(in: arView)
@@ -96,6 +99,7 @@ class MyViewController : UIViewController, ARSCNViewDelegate, ARSessionDelegate,
 extension MyViewController {
     // adds an ARAnchor a little bit in front of the camera.
     func addAnchorInFront() -> ARAnchor {
+        guard let arView = view as? ARSCNView else { return ARAnchor(transform: simd_float4x4.init()) }
         let midPoint = CGPoint(x: arView.frame.width / 2.0, y: arView.frame.height / 2.0)
         var labelTransform = matrix_identity_float4x4
         let point = arView.unprojectPoint(SCNVector3(midPoint.x, midPoint.y, 0.9986377))
